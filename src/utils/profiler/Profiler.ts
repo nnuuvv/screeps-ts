@@ -1,8 +1,9 @@
 /* tslint:disable:ban-types */
-export function init(): Profiler {
+export function init(enabled = false): Profiler {
   const defaults = {
     data: {},
-    total: 0
+    total: 0,
+    isEnabled: enabled
   };
 
   if (!Memory.profiler) {
@@ -11,7 +12,7 @@ export function init(): Profiler {
 
   const cli: Profiler = {
     clear(): string {
-      const running = isEnabled();
+      const running = isRunning();
       Memory.profiler = defaults;
       if (running) {
         Memory.profiler.start = Game.time;
@@ -30,14 +31,14 @@ export function init(): Profiler {
     },
 
     status(): string {
-      if (isEnabled()) {
+      if (isRunning()) {
         return "Profiler is running";
       }
       return "Profiler is stopped";
     },
 
     stop(): string | void {
-      if (!isEnabled()) {
+      if (!isRunning()) {
         return;
       }
       const timeRunning = Game.time - Memory.profiler.start!;
@@ -61,8 +62,8 @@ export function init(): Profiler {
 }
 
 // eslint-disable-next-line @typescript-eslint/ban-types
-function wrapFunction(obj: object, key: PropertyKey, className?: string) {
-  const descriptor = Reflect.getOwnPropertyDescriptor(obj, key);
+function wrapFunction(obj: { [key: string]: any }, key: PropertyKey, className?: string) {
+  const descriptor = Object.getOwnPropertyDescriptor(obj, key);
   if (!descriptor || descriptor.get || descriptor.set) {
     return;
   }
@@ -80,28 +81,28 @@ function wrapFunction(obj: object, key: PropertyKey, className?: string) {
   if (!className) {
     className = obj.constructor ? `${obj.constructor.name}` : "";
   }
-  const memKey = className + `:${key.toString()}`;
+  const memKey = className + `:${String(key)}`;
 
   // set a tag, so we don't wrap a function twice
-  const savedName = `__${key.toString()}__`;
-  if (Reflect.has(obj, savedName)) {
+  const savedName = `__${String(key)}__`;
+  if (savedName in obj) {
     return;
   }
 
-  Reflect.set(obj, savedName, originalFunction);
+  obj[savedName] = originalFunction;
 
   // /////////
 
-  Reflect.set(obj, key, function (this: any, ...args: any[]) {
-    if (isEnabled()) {
+  obj[String(key)] = function (this: any, ...args: any[]) {
+    if (isRunning()) {
       const start = Game.cpu.getUsed();
       const result = originalFunction.apply(this, args);
       const end = Game.cpu.getUsed();
       record(memKey, end - start);
       return result;
     }
-    return originalFunction.apply(this, args);
-  });
+    // ...
+  };
 }
 
 // eslint-disable-next-line @typescript-eslint/ban-types
@@ -115,36 +116,45 @@ export function profile(
   // eslint-disable-next-line @typescript-eslint/ban-types,@typescript-eslint/no-unused-vars
   _descriptor?: TypedPropertyDescriptor<Function>
 ): void {
-  if (!__PROFILER_ENABLED__) {
+  if (!Memory.profiler.isEnabled) {
     return;
   }
-
   if (key) {
     // case of method decorator
     wrapFunction(target, key);
     return;
   }
-
   // case of class decorator
-
   const ctor = target as any;
   if (!ctor.prototype) {
     return;
   }
 
+  const standardClassProps = Object.getOwnPropertyNames(class _ {});
+
+  const isOwnStaticMember = (propName: string) => !standardClassProps.includes(propName);
+  const staticMembers = Object.getOwnPropertyNames(ctor).filter(isOwnStaticMember);
+
   const className = ctor.name;
-  Reflect.ownKeys(ctor.prototype).forEach(k => {
+  staticMembers.forEach(k => {
+    wrapFunction(ctor, k, className);
+  });
+  const keys = Object.getOwnPropertyNames(ctor.prototype).concat(
+    Array.from(Object.getOwnPropertySymbols(ctor.prototype), String)
+  );
+  keys.forEach(k => {
+    console.log(k);
     wrapFunction(ctor.prototype, k, className);
   });
 }
 
-function isEnabled(): boolean {
+function isRunning(): boolean {
   return Memory.profiler.start !== undefined;
 }
 
 function record(key: string | symbol, time: number) {
-  if (!Memory.profiler.data[key.toString()]) {
-    Memory.profiler.data[key.toString()] = {
+  if (!Memory.profiler.data[String(key)]) {
+    Memory.profiler.data[String(key)] = {
       calls: 0,
       time: 0
     };
@@ -173,11 +183,11 @@ function outputProfilerData() {
   let calls: number;
   let time: number;
   let result: Partial<OutputData>;
-  const data = Reflect.ownKeys(Memory.profiler.data).map(key => {
-    calls = Memory.profiler.data[key.toString()].calls;
-    time = Memory.profiler.data[key.toString()].time;
+  const data = Object.keys(Memory.profiler.data).map(key => {
+    calls = Memory.profiler.data[key].calls;
+    time = Memory.profiler.data[key].time;
     result = {};
-    result.name = `${key.toString()}`;
+    result.name = `${key}`;
     result.calls = calls;
     result.cpuPerCall = time / calls;
     result.callsPerTick = calls / totalTicks;
@@ -185,7 +195,7 @@ function outputProfilerData() {
     totalCpu += result.cpuPerTick;
     return result as OutputData;
   });
-
+  console.log(JSON.stringify(data));
   data.sort((lhs, rhs) => rhs.cpuPerTick - lhs.cpuPerTick);
 
   // /////

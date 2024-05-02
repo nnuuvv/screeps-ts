@@ -13,16 +13,8 @@ declare global {
     uuid: number;
     log: any;
     // key is name
-    processes: Record<
-      string,
-      {
-        // process name
-        name: string;
-        // process id
-        id: number;
-        priority: number;
-      }
-    >;
+    processes: Record<string, Task>;
+    profiler: ProfilerMemory;
   }
 
   interface CreepMemory {
@@ -37,10 +29,13 @@ declare global {
     interface Global {
       log: any;
       Profiler: Profiler;
+      __PROFILER_ENABLED__: boolean;
     }
   }
 }
+
 interface Task {
   run(): boolean;
   priorityMulti: number;
+  approxCost: number;
 }

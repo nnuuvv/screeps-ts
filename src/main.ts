@@ -7,8 +7,10 @@ import { ErrorMapper } from "utils/ErrorMapper";
 import { usefulConstants } from "./usefulConstants";
 // eslint-disable-next-line sort-imports
 import * as Profiler from "utils/profiler";
+import { Scheduler } from "./scheduler/scheduler";
 
-global.Profiler = Profiler.init();
+// eslint-disable-next-line no-underscore-dangle
+global.Profiler = Profiler.init(usefulConstants.IS_SIM);
 export const loop = ErrorMapper.wrapLoop(() => {
   console.log(`Current game tick is ${Game.time}`);
   // Automatically delete memory of missing creeps
@@ -17,11 +19,5 @@ export const loop = ErrorMapper.wrapLoop(() => {
       delete Memory.creeps[name];
     }
   }
-  console.log(
-    "usefulConstants:",
-    usefulConstants.SOURCE_GOAL_OWNED,
-    usefulConstants.SOURCE_CARRY_PARTS_PER_DISTANCE_OWNED
-  );
-  // const sourcesList = Object.values(Game.rooms).map(room => room.find(FIND_SOURCES));
-  // sourcesList.map(sources => sources.map(source => console.log(source)));
+  Scheduler.run();
 });

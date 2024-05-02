@@ -1,11 +1,8 @@
-interface Memory {
-  profiler: ProfilerMemory;
-}
-
 interface ProfilerMemory {
   data: { [name: string]: ProfilerData };
   start?: number;
   total: number;
+  isEnabled: boolean;
 }
 
 interface ProfilerData {
@@ -21,6 +18,3 @@ interface Profiler {
   stop(): string | void;
   toString(): string;
 }
-
-// eslint-disable-next-line no-underscore-dangle
-declare const __PROFILER_ENABLED__: boolean;
