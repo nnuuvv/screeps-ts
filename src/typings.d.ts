@@ -22,6 +22,12 @@ declare global {
     room: string;
     working: boolean;
   }
+  interface Room {
+    sources: Source[];
+  }
+  interface RoomMemory {
+    sourceIds: string[];
+  }
 
   // Syntax for adding proprties to `global` (ex "global.log")
   // eslint-disable-next-line @typescript-eslint/no-namespace

@@ -3,8 +3,11 @@
 @profile
 export class Scheduler {
   public static run() {
-    console.log("Running Scheduler");
-    // const sourcesList = Object.values(Game.rooms).map(room => room.find(FIND_SOURCES));
-    // sourcesList.map(sources => sources.map(source => console.log(source)));
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    const sourcesList = Object.values(Game.rooms).map(room => room.sources);
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    sourcesList.map(sources => sources.map(source => console.log(source)));
   }
 }

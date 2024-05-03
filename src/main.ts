@@ -2,7 +2,7 @@ import { ErrorMapper } from "utils/ErrorMapper";
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 // eslint-disable-next-line sort-imports
-// import "utils/caching";
+import "utils/caching";
 // eslint-disable-next-line sort-imports
 import { usefulConstants } from "./usefulConstants";
 // eslint-disable-next-line sort-imports

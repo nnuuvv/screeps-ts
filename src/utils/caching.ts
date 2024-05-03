@@ -8,11 +8,9 @@ Object.defineProperty(Room.prototype, "sources", {
         // Find the sources and store their id's in memory,
         // NOT the full objects
         this.memory.sourceIds = this.find(FIND_SOURCES).map((source: { id: string }) => source.id);
-        console.log("found sources");
       }
       // Get the source objects from the id's in memory and store them locally
       this._sources = this.memory.sourceIds.map((id: string) => Game.getObjectById(id));
-      console.log("got sources from cache");
     }
     // return the locally stored value
     return this._sources;
