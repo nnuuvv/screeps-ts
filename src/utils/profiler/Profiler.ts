@@ -1,4 +1,3 @@
-/* tslint:disable:ban-types */
 export function init(enabled = false): Profiler {
   const defaults = {
     data: {},
@@ -116,7 +115,7 @@ export function profile(
   // eslint-disable-next-line @typescript-eslint/ban-types,@typescript-eslint/no-unused-vars
   _descriptor?: TypedPropertyDescriptor<Function>
 ): void {
-  if (!Memory.profiler.isEnabled) {
+  if (Memory.profiler && !Memory.profiler.isEnabled) {
     return;
   }
   if (key) {
@@ -130,20 +129,23 @@ export function profile(
     return;
   }
 
+  // get default class props
   const standardClassProps = Object.getOwnPropertyNames(class _ {});
-
+  // get custom static properties of current class
   const isOwnStaticMember = (propName: string) => !standardClassProps.includes(propName);
   const staticMembers = Object.getOwnPropertyNames(ctor).filter(isOwnStaticMember);
-
+  // get class name
   const className = ctor.name;
+  // wrap static members
   staticMembers.forEach(k => {
-    wrapFunction(ctor, k, className);
+    wrapFunction(ctor.prototype, k, className);
   });
+  // get non-static members
   const keys = Object.getOwnPropertyNames(ctor.prototype).concat(
     Array.from(Object.getOwnPropertySymbols(ctor.prototype), String)
   );
+  // wrap non-static members
   keys.forEach(k => {
-    console.log(k);
     wrapFunction(ctor.prototype, k, className);
   });
 }

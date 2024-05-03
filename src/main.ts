@@ -7,7 +7,7 @@ import { ErrorMapper } from "utils/ErrorMapper";
 import { usefulConstants } from "./usefulConstants";
 // eslint-disable-next-line sort-imports
 import * as Profiler from "utils/profiler";
-import { Scheduler } from "./scheduler/scheduler";
+import { Scheduler } from "scheduler/scheduler";
 
 // eslint-disable-next-line no-underscore-dangle
 global.Profiler = Profiler.init(usefulConstants.IS_SIM);
@@ -19,5 +19,6 @@ export const loop = ErrorMapper.wrapLoop(() => {
       delete Memory.creeps[name];
     }
   }
+  // run scheduler
   Scheduler.run();
 });

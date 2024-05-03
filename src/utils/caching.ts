@@ -1,6 +1,5 @@
 ﻿/* eslint-disable no-underscore-dangle */
-
-module.exports = Object.defineProperty(Room.prototype, "sources", {
+Object.defineProperty(Room.prototype, "sources", {
   get() {
     // If we dont have the value stored locally
     if (!this._sources) {

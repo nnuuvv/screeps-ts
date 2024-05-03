@@ -29,7 +29,6 @@ declare global {
     interface Global {
       log: any;
       Profiler: Profiler;
-      __PROFILER_ENABLED__: boolean;
     }
   }
 }
