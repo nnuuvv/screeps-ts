@@ -15,12 +15,20 @@ declare global {
     // key is name
     processes: Record<string, Task>;
     profiler: ProfilerMemory;
+    // type to id's
+    creepCounts: Record<creepType, number>;
   }
-
+  type creepType = "harvester" | "hauler" | "general";
+  interface Creep {
+    isFull: boolean;
+    isFilling: boolean;
+    type: creepType;
+  }
   interface CreepMemory {
-    role: string;
+    type: string;
     room: string;
     working: boolean;
+    filling: boolean;
   }
   interface Room {
     sources: Source[];
@@ -40,7 +48,6 @@ declare global {
 }
 
 interface Task {
-  run(): boolean;
   priorityMulti: number;
-  approxCost: number;
+  run(): boolean;
 }
