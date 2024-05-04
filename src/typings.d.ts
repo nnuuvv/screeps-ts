@@ -18,7 +18,7 @@ declare global {
     // type to id's
     creepCounts: Record<creepType, number>;
   }
-  type creepType = "harvester" | "hauler" | "general";
+  type creepType = "harvester" | "hauler" | "general" | "spawnKeeper";
   interface Creep {
     isFull: boolean;
     isFilling: boolean;
@@ -30,11 +30,14 @@ declare global {
     working: boolean;
     filling: boolean;
   }
+
   interface Room {
     sources: Source[];
+    centralStorage: StructureStorage | StructureContainer;
   }
   interface RoomMemory {
     sourceIds: string[];
+    centralStorageId: string;
   }
 
   // Syntax for adding proprties to `global` (ex "global.log")
@@ -43,6 +46,7 @@ declare global {
     interface Global {
       log: any;
       Profiler: Profiler;
+      tasks: Task[];
     }
   }
 }

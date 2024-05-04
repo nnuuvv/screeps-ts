@@ -11,7 +11,8 @@ function initCreepCount() {
   Memory.creepCounts = {
     harvester: 0,
     hauler: 0,
-    general: 0
+    general: 0,
+    spawnKeeper: 0
   };
   _.map(Game.creeps, creep => {
     Memory.creepCounts[creep.type]++;
